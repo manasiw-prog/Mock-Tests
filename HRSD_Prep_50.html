@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HRSD Prep</title>
+<style>
+  :root{
+    --ink:#0f1720;
+    --panel:#141d29;
+    --panel2:#1b2632;
+    --line:#2a3644;
+    --muted:#7c8ba0;
+    --text:#e8edf3;
+    --accent:#3fb6a8;
+    --accent-dim:#2c8a80;
+    --amber:#e0a84c;
+    --bad:#d9695f;
+    --good:#4caf7d;
+    --fire:#ef6b4d;
+    --fire-dim:#c14f36;
+    --mono: 'JetBrains Mono','SF Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--ink);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;}
+  body{min-height:100vh;padding:24px 16px 60px;}
+  .wrap{max-width:640px;margin:0 auto;}
+
+  .brand{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+  .brand h1{font-size:15px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin:0;color:var(--accent);cursor:pointer;}
+  .brand .sub{font-family:var(--mono);font-size:11px;color:var(--muted);}
+
+  /* ---- Home screen ---- */
+  .homeintro{text-align:center;margin:10px 0 26px;}
+  .homeintro h2{font-size:20px;margin:0 0 8px;}
+  .homeintro p{color:var(--muted);font-size:13px;margin:0;}
+
+  .modecards{display:flex;flex-direction:column;gap:14px;}
+  .modecard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 20px;cursor:pointer;transition:.15s;text-align:left;}
+  .modecard:hover{transform:translateY(-2px);}
+  .modecard.crash:hover{border-color:var(--accent);box-shadow:0 8px 24px rgba(63,182,168,.12);}
+  .modecard.mock:hover{border-color:var(--fire);box-shadow:0 8px 24px rgba(239,107,77,.14);}
+  .modecard .emoji{font-size:26px;line-height:1;margin-bottom:10px;display:block;}
+  .modecard .tag{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+  .modecard.crash .tag{color:var(--accent);}
+  .modecard.mock .tag{color:var(--fire);}
+  .modecard .tagline{font-size:17px;font-weight:700;margin-bottom:6px;}
+  .modecard .desc{font-size:13px;color:var(--muted);line-height:1.5;margin:0;}
+
+  /* ---- Shared: progress / cards / options ---- */
+  .progressrow{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .progressrow .count{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;}
+  .barouter{flex:1;height:6px;background:var(--panel2);border-radius:4px;overflow:hidden;border:1px solid var(--line);}
+  .barinner{height:100%;background:linear-gradient(90deg,var(--accent-dim),var(--accent));width:0%;transition:width .25s ease;}
+  .barinner.fire{background:linear-gradient(90deg,var(--fire-dim),var(--fire));}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;}
+  .stat .n{font-family:var(--mono);font-size:20px;font-weight:700;line-height:1;}
+  .stat .l{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+  .stat.mastered .n{color:var(--good);}
+  .stat.weak .n{color:var(--amber);}
+  .stat.wrong .n{color:var(--bad);}
+
+  .modes{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+  .modebtn{flex:1;min-width:90px;background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:12px;padding:9px 6px;border-radius:8px;cursor:pointer;font-weight:600;letter-spacing:.02em;transition:.15s;}
+  .modebtn.active{background:var(--accent);color:#06211d;border-color:var(--accent);}
+  .modebtn:hover:not(.active){border-color:var(--accent-dim);color:var(--text);}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 18px 18px;min-height:260px;}
+  .qmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .qnum{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.05em;}
+  .qtag{font-family:var(--mono);font-size:10px;background:var(--panel2);border:1px solid var(--line);color:var(--amber);padding:2px 8px;border-radius:20px;}
+  .qtext{font-size:16.5px;line-height:1.45;margin-bottom:16px;font-weight:500;}
+
+  .options{display:flex;flex-direction:column;gap:8px;}
+  .opt{display:flex;align-items:flex-start;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;cursor:pointer;transition:.12s;}
+  .opt:hover{border-color:var(--accent-dim);}
+  .opt .letter{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--muted);width:18px;flex-shrink:0;padding-top:1px;}
+  .opt .otext{font-size:14px;line-height:1.4;}
+  .opt.selected{border-color:var(--accent);background:rgba(63,182,168,.12);}
+  .opt.selected .letter{color:var(--accent);}
+  .opt.correct{border-color:var(--good);background:rgba(76,175,125,.15);}
+  .opt.correct .letter{color:var(--good);}
+  .opt.incorrect{border-color:var(--bad);background:rgba(217,105,95,.15);}
+  .opt.incorrect .letter{color:var(--bad);}
+  .opt.disabled{cursor:default;}
+
+  .feedback{margin-top:14px;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:600;display:none;}
+  .feedback.show{display:block;}
+  .feedback.right{background:rgba(76,175,125,.15);color:var(--good);border:1px solid rgba(76,175,125,.3);}
+  .feedback.wrong{background:rgba(217,105,95,.15);color:var(--bad);border:1px solid rgba(217,105,95,.3);}
+
+  .actions{display:flex;gap:8px;margin-top:16px;}
+  .btn{flex:1;padding:12px;border-radius:10px;border:none;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:.02em;transition:.12s;}
+  .btn-primary{background:var(--accent);color:#06211d;}
+  .btn-primary:hover:not(:disabled){background:#4fc9ba;}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-fire{background:var(--fire);color:#2a0f08;}
+  .btn-fire:hover:not(:disabled){background:#f4886c;}
+  .btn-ghost{background:var(--panel2);color:var(--muted);border:1px solid var(--line);}
+  .btn-ghost:hover:not(:disabled){color:var(--text);border-color:var(--accent-dim);}
+  .btn-ghost:disabled{opacity:.35;cursor:not-allowed;}
+
+  .empty{text-align:center;padding:50px 20px;color:var(--muted);}
+  .empty .big{font-size:34px;margin-bottom:8px;}
+  .empty h2{color:var(--good);margin:0 0 6px;font-size:18px;}
+  .empty p{font-size:13px;margin:0;}
+
+  .hint{text-align:center;font-size:11px;color:var(--muted);margin-top:14px;font-family:var(--mono);}
+  .resetrow{text-align:center;margin-top:22px;}
+  .resetlink{font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;}
+  .resetlink:hover{color:var(--bad);}
+
+  .locked{max-width:420px;margin:18vh auto 0;text-align:center;padding:32px 24px;background:var(--panel);border:1px solid var(--line);border-radius:14px;}
+  .locked .big{font-size:34px;margin-bottom:10px;}
+  .locked h2{margin:0 0 8px;font-size:17px;color:var(--bad);}
+  .locked p{font-size:13px;color:var(--muted);margin:0;line-height:1.5;}
+
+  /* ---- Mock test results ---- */
+  .results{text-align:center;padding:10px 6px 4px;}
+  .ringwrap{position:relative;width:220px;height:220px;margin:10px auto 8px;}
+  .ring{width:220px;height:220px;border-radius:50%;-webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 20px), #000 calc(100% - 20px));mask:radial-gradient(farthest-side, transparent calc(100% - 20px), #000 calc(100% - 20px));}
+  .ringcenter{position:absolute;inset:20px;border-radius:50%;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ringcenter .pct{font-family:var(--mono);font-size:40px;font-weight:800;line-height:1;}
+  .ringcenter .pctlabel{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+
+  .passbadge{display:inline-block;margin-top:6px;padding:6px 18px;border-radius:20px;font-weight:800;font-size:13px;letter-spacing:.04em;}
+  .passbadge.pass{background:rgba(76,175,125,.18);color:var(--good);border:1px solid rgba(76,175,125,.35);}
+  .passbadge.fail{background:rgba(217,105,95,.18);color:var(--bad);border:1px solid rgba(217,105,95,.35);}
+
+  .scorerow{display:flex;justify-content:center;gap:24px;margin-top:22px;}
+  .scorebox{text-align:center;}
+  .scorebox .n{font-family:var(--mono);font-size:22px;font-weight:700;}
+  .scorebox .l{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+  .scorebox.good .n{color:var(--good);}
+  .scorebox.bad .n{color:var(--bad);}
+
+  .threshold{font-size:12px;color:var(--muted);margin-top:18px;font-family:var(--mono);}
+
+  .reviewlist{text-align:left;margin-top:24px;}
+  .reviewitem{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+  .reviewitem .rq{font-size:13px;font-weight:600;margin-bottom:6px;}
+  .reviewitem .ra{font-family:var(--mono);font-size:11px;}
+  .reviewitem .ra.wrong{color:var(--bad);}
+  .reviewitem .ra.right{color:var(--good);}
+
+  .starttext{text-align:center;padding:20px 10px 4px;}
+  .starttext h2{margin:0 0 10px;font-size:19px;}
+  .starttext p{color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 20px;}
+
+  .backlink{font-size:12px;color:var(--muted);cursor:pointer;background:var(--panel2);border:1px solid var(--line);font-family:var(--mono);margin-bottom:16px;padding:9px 16px;border-radius:8px;font-weight:600;letter-spacing:.02em;display:inline-flex;align-items:center;gap:6px;transition:.12s;}
+  .backlink:hover{color:var(--text);border-color:var(--accent-dim);background:var(--panel);}
+
+  @media (max-width:420px){
+    .qtext{font-size:15px;}
+    .stat .n{font-size:16px;}
+    .ringwrap{width:190px;height:190px;}
+    .ring{width:190px;height:190px;}
+    .ringcenter{inset:16px;}
+    .ringcenter .pct{font-size:34px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <h1 id="brandTitle">HRSD Prep</h1>
+    <div class="sub">CIS-HR &middot; 50Q</div>
+  </div>
+  <div id="app"></div>
+</div>
+
+<script>
+window.HRSD_QUESTIONS = [{"num":1,"question":"An HR Admin without the System Admin role can do what? (Choose three.)","options":[{"letter":"A","text":"Grant roles to users or groups"},{"letter":"B","text":"Modify the HR Administration > Properties"},{"letter":"C","text":"Reset user passwords"},{"letter":"D","text":"Create HR Criteria"},{"letter":"E","text":"Configure business rules"},{"letter":"F","text":"Add users to groups"}],"answer":"BDF"},{"num":2,"question":"After the HR Admin [sn_hr_core.admin] role has been removed from the Admin role, how may a user with only the Admin role add members to HR groups?","options":[{"letter":"A","text":"The Admin must elevate their role to security_admin to add members to HR groups."},{"letter":"B","text":"The Admin follows the same process as with any group membership change."},{"letter":"C","text":"The Admin can no longer add members to HR groups."},{"letter":"D","text":"The Admin must impersonate an HR Admin to add members to HR groups."}],"answer":"C"},{"num":3,"question":"In the Create Bulk Cases module, which Filter by options are available in the dropdown? (Choose four.)","options":[{"letter":"A","text":"Document Template"},{"letter":"B","text":"Upload File"},{"letter":"C","text":"HR Service Template"},{"letter":"D","text":"User Criteria"},{"letter":"E","text":"HR Template"},{"letter":"F","text":"HR Profiles"},{"letter":"G","text":"HR Criteria >"}],"answer":"BDFG"},{"num":4,"question":"If you have both Admin and HR Admin roles and wanted to configure an Access Control for the Employee Relations Cases table, what must first be done?","options":[{"letter":"A","text":"Add the Delegated Developer role to your User record"},{"letter":"B","text":"From the User dropdown in the banner, elevate your role to security_admin"},{"letter":"C","text":"Manually add the security_admin role to your User record"},{"letter":"D","text":"Nothing would need to be done"}],"answer":"B"},{"num":5,"question":"What type of information does the HR Profile contain?","options":[{"letter":"A","text":"Personal employee data"},{"letter":"B","text":"Group membership and role information"},{"letter":"C","text":"User login and department information"},{"letter":"D","text":"A user's password"}],"answer":"A"},{"num":6,"question":"How many User Criteria Records may be applied to a single KB or KB Article?","options":[{"letter":"A","text":"Only two"},{"letter":"B","text":"Only three"},{"letter":"C","text":"Unlimited"},{"letter":"D","text":"Only one"}],"answer":"C"},{"num":7,"question":"In the base ServiceNow instance, how are User Criteria used?","options":[{"letter":"A","text":"To control which users can access the HR Case application"},{"letter":"B","text":"To control what a user sees in the information and suggested reading widgets"},{"letter":"C","text":"To control read and write access to Knowledge bases and articles"},{"letter":"D","text":"To control which users can access the HR Service Portal"}],"answer":"C"},{"num":8,"question":"Which of the following are true for an HR application as it relates to the User [sys_user] Table and the HR Profile [sn_hr_core.profile] Table?","options":[{"letter":"A","text":"Both are required."},{"letter":"B","text":"Only HR Profile table is required in HR."},{"letter":"C","text":"Neither are required."},{"letter":"D","text":"Only the User table is required in HR."}],"answer":"A"},{"num":9,"question":"In the base instance, what determines the conditions a Case must meet before it can be assigned to an agent?","options":[{"letter":"A","text":"Matching Rules"},{"letter":"B","text":"Client Rules"},{"letter":"C","text":"ACLs"},{"letter":"D","text":"Escalation Rules"}],"answer":"A"},{"num":10,"question":"What role is required, at a minimum, to view confidential HR Profile data?","options":[{"letter":"A","text":"HR Admin [sn_hr_core.admin]"},{"letter":"B","text":"HR Basic [sn_hr_core.basic]"},{"letter":"C","text":"LE Admin [sn_hr_le.admin]"},{"letter":"D","text":"HR Manager [sn_hr_core.manager]"}],"answer":"B"},{"num":11,"question":"What types of HR Document templates may be created in ServiceNow? (Choose two.)","options":[{"letter":"A","text":"Document Templates"},{"letter":"B","text":"Word document templates"},{"letter":"C","text":"PDF document templates"},{"letter":"D","text":"Text document templates"}],"answer":"AC"},{"num":12,"question":"What are the advantages of removing the HR Admin role from the system Admin role after the HR Implementation tasks have been completed? (Choose two.)","options":[{"letter":"A","text":"This ensures that HR has control over further HR configurations."},{"letter":"B","text":"The HR Admin role should remain a part of the system Admin role."},{"letter":"C","text":"This ensures that confidential HR data is only accessible to users with an HR role."},{"letter":"D","text":"It is not necessary because the system Admin always has access to all HR data."}],"answer":"AC"},{"num":13,"question":"What does ServiceNow now call the HR application?","options":[{"letter":"A","text":"HRDS - HR Deliver Service"},{"letter":"B","text":"HRSM - HR Service Management"},{"letter":"C","text":"HRMS - HR Management System"},{"letter":"D","text":"HRSD - HR Service Delivery"}],"answer":"D"},{"num":14,"question":"What defines an employee's access to the HR Service Portal / Employee Service Center?","options":[{"letter":"A","text":"Group membership"},{"letter":"B","text":"User Criteria"},{"letter":"C","text":"HR Criteria"},{"letter":"D","text":"Client Roles"}],"answer":"D"},{"num":15,"question":"What kind of records do HR Requests create?","options":[{"letter":"A","text":"HR Incidents"},{"letter":"B","text":"HR Files"},{"letter":"C","text":"HR Problems"},{"letter":"D","text":"HR Cases"}],"answer":"D"},{"num":16,"question":"In the HR Guided Setup Module, why are some tasks locked in the Task view?","options":[{"letter":"A","text":"They require an elevated role to access."},{"letter":"B","text":"They are deprecated tasks that should not be completed."},{"letter":"C","text":"They require other tasks to be completed first."},{"letter":"D","text":"They require a plugin to be activated first."}],"answer":"D"},{"num":17,"question":"Which of the following are examples of HR application scopes? (Choose four.)","options":[{"letter":"A","text":"Human Resources: COE"},{"letter":"B","text":"Human Resources: Core"},{"letter":"C","text":"Human Resources: Knowledge"},{"letter":"D","text":"Human Resources: Integrations"},{"letter":"E","text":"Human Resources: Lifecycle Events"},{"letter":"F","text":"Human Resources: Global"},{"letter":"G","text":"Human Resources: Service Portal"}],"answer":"BDEG"},{"num":18,"question":"How can an HR Administrator or Content writer limit which employees will see content on the Employee Service Center?","options":[{"letter":"A","text":"All employees will see the same information"},{"letter":"B","text":"Client roles automatically limit what is visible to employees"},{"letter":"C","text":"Using User Criteria"},{"letter":"D","text":"Using HR Criteria"}],"answer":"D"},{"num":19,"question":"If the Audience field has been configured on a Lifecycle Event Activity, what will the system do if the subject person does not meet the criteria for that Activity?","options":[{"letter":"A","text":"the activity must be manually closed by the HR professional"},{"letter":"B","text":"the Lifecycle Event will be canceled"},{"letter":"C","text":"the activity must be manually closed by the Subject person"},{"letter":"D","text":"the activity will be skipped"}],"answer":"D"},{"num":20,"question":"The ServiceNow SIM methodology is based around what generic methodologies?","options":[{"letter":"A","text":"Waterfall and Rapid Application Development (RAD)"},{"letter":"B","text":"Agile and Waterfall"},{"letter":"C","text":"Prince"},{"letter":"D","text":"Scrum and XP"}],"answer":"B"},{"num":21,"question":"If an HR Services needs to be accessible to employees on the Employee Service Center, what field must be completed on the HR Service?","options":[{"letter":"A","text":"Checklist"},{"letter":"B","text":"Fulfiller Instructions"},{"letter":"C","text":"Lifecycle Event type"},{"letter":"D","text":"Record Producer"}],"answer":"D"},{"num":22,"question":"HR Profiles may be created for multiple employees using conditions and criteria in which module?","options":[{"letter":"A","text":"Create Human Resources Profile"},{"letter":"B","text":"Create new Case"},{"letter":"C","text":"Generate HR Profiles"},{"letter":"D","text":"Bulk Cases"}],"answer":"C"},{"num":23,"question":"User authentication and Instance restriction are examples of what type of security?","options":[{"letter":"A","text":"Physical Security"},{"letter":"B","text":"Roles and Groups"},{"letter":"C","text":"Contextual Security"},{"letter":"D","text":"Platform Access"}],"answer":"D"},{"num":24,"question":"If the HR Service does not have any Case options specified, HR Documents must be manually generated for the HR Case. In this situation, who is able to generate an HR document for the Case?","options":[{"letter":"A","text":"Any HR professional"},{"letter":"B","text":"Only an HR Admin"},{"letter":"C","text":"Only an HR Manager"},{"letter":"D","text":"Only the assigned to person"}],"answer":"D"},{"num":25,"question":"When does the HR Template populate information on the HR Case form?","options":[{"letter":"A","text":"When the Opened for person is selected"},{"letter":"B","text":"When the Assignment group is selected."},{"letter":"C","text":"When the HR Case Type is selected."},{"letter":"D","text":"When the HR service is selected on the HR Case Creation form."}],"answer":"D"},{"num":26,"question":"The HR Profile table is used to track information for what Employment types? (Choose three.)","options":[{"letter":"A","text":"Other"},{"letter":"B","text":"Potential Employee"},{"letter":"C","text":"Full Time Employee"},{"letter":"D","text":"Temporary Employee"},{"letter":"E","text":"Spouse"},{"letter":"F","text":"Contractor"}],"answer":"CDF"},{"num":27,"question":"If the HRSD application is scoped, why can the System Administrator initially access all HR applications after the plugin has been installed?","options":[{"letter":"A","text":"When the HR plugins are installed, the necessary HR roles are added to the Admin role."},{"letter":"B","text":"The roles were manually granted by a ServiceNow security user."},{"letter":"C","text":"The Admin will always have access to all HR tables and data."},{"letter":"D","text":"The roles were manually granted by an HR Admin."}],"answer":"A"},{"num":28,"question":"Scenario: You have an existing ITSM customer who is now implementing HR Enterprise. In UAT, they discovered that they get an error message about a Read operation from the HR scope to the Global scope being denied. You have verified that each Script Include was written correctly. What else must be done to allow the Script Includes to work in the HR application?","options":[{"letter":"A","text":"The Status of the associated record on the Application Restricted Caller Access list must be set to Denied."},{"letter":"B","text":"You must create a custom ACL to allow the script includes to work."},{"letter":"C","text":"The Status of the associated record on the Application Restricted Caller Access list must be set to Allowed."},{"letter":"D","text":"You must change Scope for the script includes to work."}],"answer":"C"},{"num":29,"question":"In the HR Guided Setup Module, the Configuration View displays which of the following for a Category? (Choose three.)","options":[{"letter":"A","text":"Properties"},{"letter":"B","text":"Gauges"},{"letter":"C","text":"Dashboards"},{"letter":"D","text":"Lists"},{"letter":"E","text":"Overviews"},{"letter":"F","text":"Forms"}],"answer":"ADF"},{"num":30,"question":"What method needs to be invoked from MatchingRuleProcessor class?","options":[{"letter":"A","text":"processAndGetCandidates"},{"letter":"B","text":"processAndGetUsers"},{"letter":"C","text":"processAndGelList"},{"letter":"D","text":"processAndGetArray"}],"answer":"A"},{"num":31,"question":"If an HR Service will only be used internally by HR professionals, what is the minimum configuration needed?","options":[{"letter":"A","text":"HR Service and HR Template."},{"letter":"B","text":"HR Service, HR Template, and Record Producer."},{"letter":"C","text":"HR Service."},{"letter":"D","text":"HR Service, HR Template, Record Producer, and Lifecycle event type."}],"answer":"C"},{"num":32,"question":"The Knowledge bases searched for the Knowledge results section on an HR Case are determined by what?","options":[{"letter":"A","text":"Contextual Search configuration"},{"letter":"B","text":"HR Service configuration"},{"letter":"C","text":"HR Criteria configuration"},{"letter":"D","text":"Knowledge Management configuration"}],"answer":"A"},{"num":33,"question":"When gathering requirements for HR Services, it is best to begin by defining the Service then working upwards, categorizing in progressively more detail. What are the basic categories used?","options":[{"letter":"A","text":"HR Service, Topic Detail, COE."},{"letter":"B","text":"HR Service, Topic Category, Activity Category, Activities, COE."},{"letter":"C","text":"HR Service, Topic Category, COE."},{"letter":"D","text":"HR Service, Topic Detail, Topic Category, COE."}],"answer":"D"},{"num":34,"question":"If a knowledge base and its articles have no user criteria selected, a user without a role can do what?","options":[{"letter":"A","text":"read and contribute articles"},{"letter":"B","text":"read articles, but not contribute"},{"letter":"C","text":"can neither read nor contribute articles"},{"letter":"D","text":"contribute, but not read articles"}],"answer":"B"},{"num":35,"question":"How does ServiceNow know which HR Template to use on an HR Case?","options":[{"letter":"A","text":"The HR Template is referenced on the HR Service record."},{"letter":"B","text":"The HR Template is referenced on the record producer form."},{"letter":"C","text":"Each COE has a specific HR Template."},{"letter":"D","text":"The HR Template is selected directly on the Catalog item."}],"answer":"A"},{"num":36,"question":"What are the key differentiators between an HR Profile record and a User record? (Choose three.)","options":[{"letter":"A","text":"The HR Profile stores the employee's assigned delegates."},{"letter":"B","text":"The HR Profile includes group membership information."},{"letter":"C","text":"The HR Profile includes employee organizational information like Colleagues."},{"letter":"D","text":"The HR Profile stores login credential information."},{"letter":"E","text":"The HR Profile may include employee marital status."},{"letter":"F","text":"The HR Profile is intended to store confidential employee data that is pertinent for HR."}],"answer":"CEF"},{"num":37,"question":"If a customer has a huge employee population, complex organizational structures, and requires custom integrations and language translations, what level of configuration complexity would their project be considered?","options":[{"letter":"A","text":"Drastic"},{"letter":"B","text":"Low"},{"letter":"C","text":"Major"},{"letter":"D","text":"Nominal"}],"answer":"A"},{"num":38,"question":"When an employee completes a questionnaire on an Employee Form, on which table does the system store their answers?","options":[{"letter":"A","text":"Form [sys_ui_form]"},{"letter":"B","text":"Metric Result [asmt_metric_result]"},{"letter":"C","text":"Question Answer [question_answer]"},{"letter":"D","text":"HR Case [sn_hr_core_case]"}],"answer":"B"},{"num":39,"question":"With the I18N: Knowledge Management Internationalization Plugin v2 enabled, how are translated Knowledge articles associated with each other so that the user is presented with the article in the selected language?","options":[{"letter":"A","text":"Article Versions related list"},{"letter":"B","text":"Knowledge feedback related list"},{"letter":"C","text":"Affected Products related list"},{"letter":"D","text":"Translated Versions related list"}],"answer":"D"},{"num":40,"question":"When creating a PDF Document Template, where does the list of Document Revisions come from?","options":[{"letter":"A","text":"From Managed Documents"},{"letter":"B","text":"From Document Templates"},{"letter":"C","text":"From Knowledge Articles"},{"letter":"D","text":"From System Documents"}],"answer":"A"},{"num":41,"question":"Only users with which role, at a minimum, may view the confidential data on the HR Profiles table?","options":[{"letter":"A","text":"Profile Writer [sn_hr_core.profile_writer]"},{"letter":"B","text":"Profile Reader [sn_hr_core.profile_reader]"},{"letter":"C","text":"HR Case Writer [sn_hr_le.case_writer]"},{"letter":"D","text":"HR Case Reader [sn_hr_le.case_reader]"}],"answer":"B"},{"num":42,"question":"What determines if a user can view a Knowledge article?","options":[{"letter":"A","text":"Can/Cannot Read User Criteria"},{"letter":"B","text":"Can/Cannot Contribute User Criteria"},{"letter":"C","text":"HR Criteria"},{"letter":"D","text":"ACL Rules"}],"answer":"A"},{"num":43,"question":"What do Client Roles define?","options":[{"letter":"A","text":"Groups for the customer's clients."},{"letter":"B","text":"Roles that come into force if user uses a browser client."},{"letter":"C","text":"Named roles (eg VP of Operations, SVP Sales) for a customer's clients."},{"letter":"D","text":"Access for new hires, employees, alumni, contingent, and contract workers."}],"answer":"D"},{"num":44,"question":"When a Guided Setup task is marked as complete, how can it be reopened?","options":[{"letter":"A","text":"Closed tasks cannot be reopened"},{"letter":"B","text":"Click the Mark as Incomplete button"},{"letter":"C","text":"Submit a request in HI"},{"letter":"D","text":"Restart the Guided Setup entirely"}],"answer":"B"},{"num":45,"question":"When creating a PDF Document template, the Document revision field must be completed. How does the system determine which documents are available to be selected for this field?","options":[{"letter":"A","text":"You must be a member of the Owning Group for the Managed Document"},{"letter":"B","text":"All Documents are visible"},{"letter":"C","text":"Your group memberships and the Document owner field on the Managed Document record"},{"letter":"D","text":"You must have created the Managed Document record"}],"answer":"C"},{"num":46,"question":"What is used to create a link on an HR Case form that accesses information outside the application?","options":[{"letter":"A","text":"HR Service"},{"letter":"B","text":"Link Generator"},{"letter":"C","text":"Restricted Caller Access"},{"letter":"D","text":"COE Configuration"}],"answer":"B"},{"num":47,"question":"When configuring a PDF Document Template, how does the system map form fields to ServiceNow fields?","options":[{"letter":"A","text":"The Document field type on the PDF Template Mappings record"},{"letter":"B","text":"The Preview value field on the PDF Template Mappings record"},{"letter":"C","text":"The Mapping field on the PDF Template Mappings record"},{"letter":"D","text":"The Document field on the PDF Template Mappings record"}],"answer":"C"},{"num":48,"question":"If the Match All field is checked on a User Criteria record, the user:","options":[{"letter":"A","text":"Must satisfy at least one of the criteria to meet the conditions."},{"letter":"B","text":"Must satisfy at least of the criteria to meet the conditions."},{"letter":"C","text":"Must satisfy a majority percentage of the criteria to meet the conditions."},{"letter":"D","text":"Must satisfy all of the selected criteria to meet the conditions."}],"answer":"D"},{"num":49,"question":"If a new HR Knowledge base is created, how can it be included in the Knowledge results section on the HR Case form?","options":[{"letter":"A","text":"Add it to the HR Template"},{"letter":"B","text":"Add it to the HR Service configuration"},{"letter":"C","text":"All Knowledge bases are searched by default"},{"letter":"D","text":"Add it to the Contextual Search configuration"}],"answer":"D"},{"num":50,"question":"How is the HR template associated with an HR service?","options":[{"letter":"A","text":"On the HR service record"},{"letter":"B","text":"On the Lifecycle Event Activity Set"},{"letter":"C","text":"On the HR template record"},{"letter":"D","text":"On the HR case"}],"answer":"A"}];
+</script>
+<script>
+// Scales to any number of people: this file is hosted once (e.g. on GitHub
+// Pages), and each person gets a link like
+//   https://you.github.io/hrsd-drill/quiz50.html?id=alice
+// access50.json (hosted next to this file, in the same repo) is a flat map
+// of id -> true/false, e.g. {"alice": true, "bob": true, "carol": false}.
+// To onboard someone: add "theirid": true to access50.json and send them
+// the link with their id. To revoke: flip their entry to false. No new
+// file or re-send needed for either action.
+//
+// This is a client-side gate, not real security \u2014 someone who saves the
+// file before revocation keeps a working offline copy, and a technical
+// user could edit the HTML to remove the check. It stops casual continued
+// access once you've turned someone off, for anyone who's online.
+function showLocked(message){
+  const wrap = document.querySelector('.wrap');
+  if(wrap){
+    wrap.innerHTML = `
+      <div class="locked">
+        <div class="big">&#128274;</div>
+        <h2>Access unavailable</h2>
+        <p>${message}<br>Ask the sender for a new link if you still need it.</p>
+      </div>`;
+  }
+}
+
+window.__ACCESS_CHECK__ = (async function(){
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+
+  if(!id){
+    return false; // no id in link \u2014 fail open (e.g. testing a raw download)
+  }
+
+  try{
+    const res = await fetch(`access50.json?t=${Date.now()}`, {cache: 'no-store'});
+    if(!res.ok) return false;
+    const list = await res.json();
+    if(list[id] === false){
+      showLocked('Your access to this tool has been revoked.');
+      return true;
+    }
+    if(!(id in list)){
+      showLocked('This link is not recognized. Ask the sender for a valid link.');
+      return true;
+    }
+  }catch(e){
+    // offline or access50.json unreachable \u2014 fail open
+  }
+  return false;
+})();
+</script>
+<script>
+(function(){
+  const ALL = window.HRSD_QUESTIONS;
+  const PASS_THRESHOLD = 70;
+  const RAINBOW = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#8b5cf6'];
+  const appEl = document.getElementById('app');
+
+  function escapeHtml(s){
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+  function isMulti(q){ return q.answer.length > 1; }
+  function shuffledIndices(n){
+    const arr = Array.from({length:n}, (_,i)=>i);
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  // ================= HOME =================
+  function renderHome(){
+    appEl.innerHTML = `
+      <div class="homeintro">
+        <h2>Pick your mode</h2>
+        <p>Same 50 questions, two different ways to use them.</p>
+      </div>
+      <div class="modecards">
+        <div class="modecard crash" id="goCrash">
+          <span class="emoji">\u26a1</span>
+          <div class="tag">Crash Course</div>
+          <div class="tagline">No Time? No Problem.</div>
+          <p class="desc">Master key questions fast. Learn smart, remember more, and get test-ready \u2014 even with a busy schedule.</p>
+        </div>
+        <div class="modecard mock" id="goMock">
+          <span class="emoji">\ud83d\udd25</span>
+          <div class="tag">Mock Test</div>
+          <div class="tagline">Fire Up. Test. Conquer.</div>
+          <p class="desc">Test your recall, build confidence, and find out if you're ready.</p>
+        </div>
+      </div>
+    `;
+    document.getElementById('goCrash').addEventListener('click', initCrashCourse);
+    document.getElementById('goMock').addEventListener('click', initMockTest);
+  }
+
+  function backButton(){
+    return `<button class="backlink" id="homeBtn">&larr; back to modes</button>`;
+  }
+  function wireBackButton(){
+    const b = document.getElementById('homeBtn');
+    if(b) b.addEventListener('click', renderHome);
+  }
+
+  // ================= CRASH COURSE (drill mode) =================
+  const STORE_KEY = 'hrsd_progress_v1_50q';
+  let stats = {};
+  let ccMode = 'all';
+  let ccPool = [];
+  let ccCurrent = null;
+  let ccSelected = new Set();
+  let ccAnswered = false;
+  let ccSessionStreak = 0;
+
+  async function loadStats(){
+    try{
+      if(window.storage){
+        const r = await window.storage.get(STORE_KEY, false);
+        if(r && r.value){ stats = JSON.parse(r.value); return; }
+      }
+      const local = localStorage.getItem(STORE_KEY);
+      if(local){ stats = JSON.parse(local); }
+    }catch(e){ stats = {}; }
+  }
+  async function saveStats(){
+    try{
+      if(window.storage){ await window.storage.set(STORE_KEY, JSON.stringify(stats), false); return; }
+      localStorage.setItem(STORE_KEY, JSON.stringify(stats));
+    }catch(e){}
+  }
+  function getStat(num){
+    if(!stats[num]) stats[num] = {seen:0, streak:0, ever:false};
+    return stats[num];
+  }
+  function classify(num){
+    const s = getStat(num);
+    if(s.seen === 0) return 'unseen';
+    if(s.streak >= 2) return 'mastered';
+    return 'weak';
+  }
+  function computeCounts(){
+    let mastered=0, weak=0, unseen=0;
+    ALL.forEach(q=>{
+      const c = classify(q.num);
+      if(c==='mastered') mastered++;
+      else if(c==='weak') weak++;
+      else unseen++;
+    });
+    return {mastered, weak, unseen};
+  }
+
+  async function initCrashCourse(){
+    await loadStats();
+    renderCrashShell();
+    ccMode = 'all';
+    buildCcPool();
+    ccNextQuestion();
+  }
+
+  function renderCrashShell(){
+    appEl.innerHTML = `
+      ${backButton()}
+      <div class="stats">
+        <div class="stat mastered"><div class="n" id="statMastered">0</div><div class="l">Mastered</div></div>
+        <div class="stat weak"><div class="n" id="statWeak">0</div><div class="l">Weak</div></div>
+        <div class="stat" ><div class="n" id="statUnseen">0</div><div class="l">Unseen</div></div>
+        <div class="stat wrong"><div class="n" id="statStreak">0</div><div class="l">Streak</div></div>
+      </div>
+      <div class="barouter" style="margin-bottom:18px;"><div class="barinner" id="progressBarCC"></div></div>
+      <div class="modes">
+        <button class="modebtn active" data-mode="all">All 50</button>
+        <button class="modebtn" data-mode="weak">Weak only</button>
+        <button class="modebtn" data-mode="unseen">Unseen only</button>
+      </div>
+      <div class="card" id="ccCard"></div>
+      <div class="hint">tap an option, then Check &middot; multi-select questions need all correct letters</div>
+      <button class="btn btn-ghost" id="ccResetBtn" style="width:100%;margin-top:22px;">Reset all Crash Course progress</button>
+    `;
+    wireBackButton();
+    document.querySelectorAll('.modebtn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.modebtn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        ccMode = btn.getAttribute('data-mode');
+        buildCcPool();
+        ccNextQuestion();
+      });
+    });
+    // Two-tap confirm instead of window.confirm() — native confirm() dialogs
+    // are silently blocked or no-op in many in-app browsers (Slack, WhatsApp,
+    // Gmail preview, etc.), which made this button appear broken there.
+    let resetArmed = false;
+    let resetTimer = null;
+    const resetBtn = document.getElementById('ccResetBtn');
+    resetBtn.addEventListener('click', async ()=>{
+      if(!resetArmed){
+        resetArmed = true;
+        resetBtn.textContent = 'Tap again to confirm reset';
+        resetBtn.style.color = 'var(--bad)';
+        resetBtn.style.borderColor = 'var(--bad)';
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(()=>{
+          resetArmed = false;
+          resetBtn.textContent = 'Reset all Crash Course progress';
+          resetBtn.style.color = '';
+          resetBtn.style.borderColor = '';
+        }, 4000);
+        return;
+      }
+      clearTimeout(resetTimer);
+      resetArmed = false;
+      stats = {};
+      await saveStats();
+      ccSessionStreak = 0;
+      buildCcPool();
+      ccRefreshStats();
+      ccNextQuestion();
+      resetBtn.textContent = 'Progress reset \u2713';
+      resetBtn.style.color = 'var(--good)';
+      resetBtn.style.borderColor = 'var(--good)';
+      setTimeout(()=>{
+        resetBtn.textContent = 'Reset all Crash Course progress';
+        resetBtn.style.color = '';
+        resetBtn.style.borderColor = '';
+      }, 1800);
+    });
+    ccRefreshStats();
+  }
+
+  function ccRefreshStats(){
+    const c = computeCounts();
+    const sm = document.getElementById('statMastered');
+    if(!sm) return;
+    document.getElementById('statMastered').textContent = c.mastered;
+    document.getElementById('statWeak').textContent = c.weak;
+    document.getElementById('statUnseen').textContent = c.unseen;
+    document.getElementById('statStreak').textContent = ccSessionStreak;
+    document.getElementById('progressBarCC').style.width = Math.round((c.mastered/ALL.length)*100) + '%';
+  }
+
+  function buildCcPool(){
+    if(ccMode==='all') ccPool = ALL.slice();
+    else ccPool = ALL.filter(q => classify(q.num) === ccMode);
+    for(let i=ccPool.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [ccPool[i],ccPool[j]]=[ccPool[j],ccPool[i]];
+    }
+  }
+
+  function ccNextQuestion(){
+    if(ccPool.length === 0) buildCcPool();
+    if(ccPool.length === 0){ ccRenderEmpty(); return; }
+    ccCurrent = ccPool.pop();
+    ccSelected = new Set();
+    ccAnswered = false;
+    ccRender();
+  }
+
+  function ccRenderEmpty(){
+    const cardEl = document.getElementById('ccCard');
+    const label = ccMode==='weak' ? 'weak questions' : ccMode==='unseen' ? 'unseen questions' : 'questions';
+    cardEl.innerHTML = `<div class="empty"><div class="big">&#10003;</div><h2>Nothing left in this set</h2><p>No ${label} remaining right now \u2014 switch mode or reset progress.</p></div>`;
+  }
+
+  function ccRender(){
+    const cardEl = document.getElementById('ccCard');
+    const q = ccCurrent;
+    const multi = isMulti(q);
+    let optsHtml = q.options.map(o => {
+      return `<div class="opt" data-letter="${o.letter}"><span class="letter">${o.letter}</span><span class="otext">${escapeHtml(o.text)}</span></div>`;
+    }).join('');
+
+    cardEl.innerHTML = `
+      <div class="qmeta">
+        <span class="qnum">Q${q.num} / 50</span>
+        ${multi ? `<span class="qtag">choose ${q.answer.length}</span>` : ''}
+      </div>
+      <div class="qtext">${escapeHtml(q.question)}</div>
+      <div class="options">${optsHtml}</div>
+      <div class="feedback" id="ccFeedback"></div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="ccSkipBtn">Skip</button>
+        <button class="btn btn-primary" id="ccCheckBtn" disabled>Check</button>
+      </div>
+    `;
+
+    document.querySelectorAll('#ccCard .opt').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        if(ccAnswered) return;
+        const letter = el.getAttribute('data-letter');
+        if(!multi){
+          ccSelected = new Set([letter]);
+          document.querySelectorAll('#ccCard .opt').forEach(o=>o.classList.remove('selected'));
+          el.classList.add('selected');
+        } else {
+          if(ccSelected.has(letter)){ ccSelected.delete(letter); el.classList.remove('selected'); }
+          else { ccSelected.add(letter); el.classList.add('selected'); }
+        }
+        document.getElementById('ccCheckBtn').disabled = ccSelected.size === 0;
+      });
+    });
+
+    document.getElementById('ccCheckBtn').addEventListener('click', ccCheckAnswer);
+    document.getElementById('ccSkipBtn').addEventListener('click', ()=>{ ccNextQuestion(); });
+  }
+
+  function ccCheckAnswer(){
+    if(ccAnswered) return;
+    ccAnswered = true;
+    const q = ccCurrent;
+    const correctSet = new Set(q.answer.split(''));
+    const isRight = correctSet.size === ccSelected.size && [...correctSet].every(l=>ccSelected.has(l));
+
+    document.querySelectorAll('#ccCard .opt').forEach(el=>{
+      const letter = el.getAttribute('data-letter');
+      el.classList.add('disabled');
+      if(correctSet.has(letter)) el.classList.add('correct');
+      else if(ccSelected.has(letter)) el.classList.add('incorrect');
+    });
+
+    const fb = document.getElementById('ccFeedback');
+    fb.classList.add('show');
+    if(isRight){
+      fb.classList.add('right');
+      fb.textContent = 'Correct \u2014 answer: ' + q.answer;
+      ccSessionStreak++;
+    } else {
+      fb.classList.add('wrong');
+      fb.textContent = 'Not quite \u2014 correct answer: ' + q.answer;
+      ccSessionStreak = 0;
+    }
+
+    const s = getStat(q.num);
+    s.seen++;
+    s.streak = isRight ? s.streak + 1 : 0;
+    s.ever = s.ever || isRight;
+    saveStats();
+    ccRefreshStats();
+
+    const checkBtn = document.getElementById('ccCheckBtn');
+    checkBtn.textContent = 'Next';
+    checkBtn.disabled = false;
+    checkBtn.replaceWith(checkBtn.cloneNode(true));
+    document.getElementById('ccCheckBtn').addEventListener('click', ()=>{ ccNextQuestion(); });
+    document.getElementById('ccSkipBtn').style.visibility = 'hidden';
+  }
+
+  // ================= MOCK TEST =================
+  let mtOrder = [];
+  let mtIdx = 0;
+  let mtAnswers = {};
+
+  function initMockTest(){
+    renderMtStart();
+  }
+
+  function renderMtStart(){
+    appEl.innerHTML = `
+      ${backButton()}
+      <div class="card">
+        <div class="starttext">
+          <h2>Ready when you are</h2>
+          <p>50 questions, one pass through, no peeking at answers until the end \u2014 just like the real exam. You need <b>70%</b> to pass. Your progress isn't saved between sessions, so plan for one sitting (roughly 15\u201325 minutes).</p>
+          <button class="btn btn-fire" id="mtStartBtn" style="width:100%;">Start mock test</button>
+        </div>
+      </div>
+    `;
+    wireBackButton();
+    document.getElementById('mtStartBtn').addEventListener('click', mtStartTest);
+  }
+
+  function mtStartTest(){
+    mtOrder = shuffledIndices(ALL.length);
+    mtIdx = 0;
+    mtAnswers = {};
+    mtRenderQuestion();
+  }
+
+  function mtRenderQuestion(){
+    const q = ALL[mtOrder[mtIdx]];
+    const multi = isMulti(q);
+    const selected = mtAnswers[q.num] || new Set();
+
+    const optsHtml = q.options.map(o => {
+      const isSel = selected.has(o.letter);
+      return `<div class="opt${isSel ? ' selected' : ''}" data-letter="${o.letter}"><span class="letter">${o.letter}</span><span class="otext">${escapeHtml(o.text)}</span></div>`;
+    }).join('');
+
+    appEl.innerHTML = `
+      ${backButton()}
+      <div class="progressrow">
+        <span class="count">${mtIdx+1} / ${ALL.length}</span>
+        <div class="barouter"><div class="barinner fire" style="width:${Math.round((mtIdx/ALL.length)*100)}%;"></div></div>
+      </div>
+      <div class="card">
+        <div class="qmeta">
+          <span class="qnum">Question ${mtIdx+1}</span>
+          ${multi ? `<span class="qtag">choose ${q.answer.length}</span>` : ''}
+        </div>
+        <div class="qtext">${escapeHtml(q.question)}</div>
+        <div class="options">${optsHtml}</div>
+        <div class="actions">
+          <button class="btn btn-ghost" id="mtBackBtn" ${mtIdx===0 ? 'disabled' : ''}>Back</button>
+          <button class="btn btn-fire" id="mtNextBtn">${mtIdx === ALL.length-1 ? 'Submit test' : 'Next'}</button>
+        </div>
+      </div>
+      <div class="hint">Select an answer, then Next. You can change your answer before moving on.</div>
+    `;
+    wireBackButton();
+
+    document.querySelectorAll('.card .opt').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const letter = el.getAttribute('data-letter');
+        const set = mtAnswers[q.num] || new Set();
+        if(!multi){
+          mtAnswers[q.num] = new Set([letter]);
+          document.querySelectorAll('.card .opt').forEach(o=>o.classList.remove('selected'));
+          el.classList.add('selected');
+        } else {
+          if(set.has(letter)){ set.delete(letter); el.classList.remove('selected'); }
+          else { set.add(letter); el.classList.add('selected'); }
+          mtAnswers[q.num] = set;
+        }
+      });
+    });
+
+    document.getElementById('mtBackBtn').addEventListener('click', ()=>{
+      if(mtIdx > 0){ mtIdx--; mtRenderQuestion(); }
+    });
+    document.getElementById('mtNextBtn').addEventListener('click', ()=>{
+      if(mtIdx < ALL.length - 1){ mtIdx++; mtRenderQuestion(); }
+      else { mtFinishTest(); }
+    });
+  }
+
+  function mtBuildRainbowGradient(pct){
+    if(pct <= 0) return 'var(--panel2)';
+    const stops = RAINBOW.length;
+    let parts = [];
+    for(let i=0;i<stops;i++){
+      const pos = (pct * (i+1) / stops).toFixed(2);
+      parts.push(`${RAINBOW[i]} ${pos}%`);
+    }
+    parts.push(`var(--panel2) ${pct}%`);
+    parts.push(`var(--panel2) 100%`);
+    return `conic-gradient(from -90deg, ${parts.join(', ')})`;
+  }
+
+  function mtFinishTest(){
+    let correctCount = 0;
+    const wrongList = [];
+    ALL.forEach(q=>{
+      const correctSet = new Set(q.answer.split(''));
+      const sel = mtAnswers[q.num] || new Set();
+      const isRight = correctSet.size === sel.size && [...correctSet].every(l=>sel.has(l));
+      if(isRight) correctCount++;
+      else wrongList.push({q, sel});
+    });
+
+    const pct = Math.round((correctCount / ALL.length) * 100);
+    const passed = pct >= PASS_THRESHOLD;
+    const gradient = mtBuildRainbowGradient(pct);
+
+    appEl.innerHTML = `
+      ${backButton()}
+      <div class="card">
+        <div class="results">
+          <div class="ringwrap">
+            <div class="ring" style="background:${gradient};"></div>
+            <div class="ringcenter">
+              <div class="pct">${pct}%</div>
+              <div class="pctlabel">Score</div>
+            </div>
+          </div>
+          <div class="passbadge ${passed ? 'pass' : 'fail'}">${passed ? 'PASS' : 'NOT YET'}</div>
+          <div class="threshold">70% required to pass</div>
+          <div class="scorerow">
+            <div class="scorebox good"><div class="n">${correctCount}</div><div class="l">Correct</div></div>
+            <div class="scorebox bad"><div class="n">${ALL.length - correctCount}</div><div class="l">Missed</div></div>
+            <div class="scorebox"><div class="n">${ALL.length}</div><div class="l">Total</div></div>
+          </div>
+          <div class="actions" style="margin-top:26px;">
+            <button class="btn btn-ghost" id="mtReviewBtn">${wrongList.length ? 'Review missed questions' : 'Nothing missed'}</button>
+            <button class="btn btn-fire" id="mtRetakeBtn">Retake test</button>
+          </div>
+          <div class="reviewlist" id="mtReviewList" style="display:none;"></div>
+        </div>
+      </div>
+    `;
+    wireBackButton();
+
+    document.getElementById('mtRetakeBtn').addEventListener('click', mtStartTest);
+
+    const reviewBtn = document.getElementById('mtReviewBtn');
+    if(wrongList.length){
+      reviewBtn.addEventListener('click', ()=>{
+        const rl = document.getElementById('mtReviewList');
+        if(rl.style.display === 'none'){
+          rl.style.display = 'block';
+          rl.innerHTML = wrongList.map(({q, sel})=>{
+            const selText = sel.size ? [...sel].sort().join('') : '(no answer)';
+            return `<div class="reviewitem">
+              <div class="rq">${escapeHtml(q.question)}</div>
+              <div class="ra wrong">Your answer: ${selText}</div>
+              <div class="ra right">Correct answer: ${q.answer}</div>
+            </div>`;
+          }).join('');
+          reviewBtn.textContent = 'Hide review';
+        } else {
+          rl.style.display = 'none';
+          reviewBtn.textContent = 'Review missed questions';
+        }
+      });
+    } else {
+      reviewBtn.disabled = true;
+    }
+  }
+
+  document.getElementById('brandTitle').addEventListener('click', renderHome);
+
+  (async function init(){
+    const locked = await window.__ACCESS_CHECK__;
+    if(locked) return;
+    renderHome();
+  })();
+})();
+</script>
+</body>
+</html>
