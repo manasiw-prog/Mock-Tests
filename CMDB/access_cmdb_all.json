@@ -1,5 +1,5 @@
 {
-  "alice": true,
-  "bob": true,
+  "alice": false,
+  "bob": false,
   "pradnil": true
 }
