@@ -239,7 +239,7 @@ window.__ACCESS_CHECK__ = (async function(){
   }
 
   try{
-    const res = await fetch(`access_all.json?t=${Date.now()}`, {cache: 'no-store'});
+    const res = await fetch(`access_cmdb_all.json?t=${Date.now()}`, {cache: 'no-store'});
     if(!res.ok) return false;
     const list = await res.json();
     if(list[id] === false){
